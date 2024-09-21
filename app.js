@@ -1,50 +1,30 @@
-// Replace with your own News API key
-const apiKey = '9988ad3ffb2f4c9693a6abba980b09a2';
-const newsContainer = document.getElementById('news-container');
-const searchInput = document.getElementById('search');
-const searchBtn = document.getElementById('search-btn');
+const express = require('express');
+const axios = require('axios');
+const path = require('path');
+const app = express();
+const PORT = 3000;
 
-// Fetch news articles from News API
-async function fetchNews(query = '') {
-    const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    displayNews(data.articles);
-}
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Display news articles on the webpage
-function displayNews(articles) {
-    newsContainer.innerHTML = '';  // Clear previous news
-    if (articles.length === 0) {
-        newsContainer.innerHTML = '<p>No news found.</p>';
-        return;
-    }
-    
-    articles.forEach(article => {
-        const newsArticle = document.createElement('div');
-        newsArticle.classList.add('news-article');
-
-        const newsImage = article.urlToImage
-            ? `<div class="news-image"><img src="${article.urlToImage}" alt="News image"></div>`
-            : '';
-
-        newsArticle.innerHTML = `
-            ${newsImage}
-            <div class="news-content">
-                <h2>${article.title}</h2>
-                <p>${article.description || 'No description available'}</p>
-                <a href="${article.url}" target="_blank">Read more</a>
-            </div>
-        `;
-        newsContainer.appendChild(newsArticle);
-    });
-}
-
-// Add event listener to the search button
-searchBtn.addEventListener('click', () => {
-    const query = searchInput.value;
-    fetchNews(query);
+// Endpoint to get news data from NewsAPI
+app.get('/news', async (req, res) => {
+  try {
+    const apiKey = '9988ad3ffb2f4c9693a6abba980b09a2'; // Replace with your NewsAPI key
+    const apiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+    const response = await axios.get(apiUrl);
+    res.json(response.data); // Send the fetched news data to the frontend
+  } catch (error) {
+    res.status(500).send('Error fetching news');
+  }
 });
 
-// Fetch default news on page load
-fetchNews('latest');
+// Fallback: Catch-all route to serve index.html for all routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

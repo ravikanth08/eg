@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .news-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .news-item {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px;
+      width: 30%;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .news-item img {
+      max-width: 100%;
+    }
+    .news-item h2 {
+      font-size: 1.5rem;
+    }
+    .news-item p {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Latest News</h1>
+  <div class="news-container" id="news-container">
+    <!-- News articles will be dynamically loaded here -->
+  </div>
+
+  <script>
+    async function fetchNews() {
+      try {
+        const response = await fetch('/news'); // Fetching news from backend
+        const data = await response.json();
+        displayNews(data.articles);
+      } catch (error) {
+        console.error('Error fetching news:', error);
+      }
+    }
+
+    function displayNews(articles) {
+      const newsContainer = document.getElementById('news-container');
+      newsContainer.innerHTML = '';
+
+      articles.forEach(article => {
+        const newsItem = document.createElement('div');
+        newsItem.classList.add('news-item');
+
+        newsItem.innerHTML = `
+          <img src="${article.urlToImage}" alt="${article.title}">
+          <h2>${article.title}</h2>
+          <p>${article.description}</p>
+          <a href="${article.url}" target="_blank">Read more</a>
+        `;
+
+        newsContainer.appendChild(newsItem);
+      });
+    }
+
+    // Fetch news when the page loads (this is a browser-specific operation)
+    window.onload = fetchNews;
+  </script>
+</body>
+</html>
